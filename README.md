@@ -103,6 +103,20 @@ The iframe posts `{ source: 'scanifly-roof-estimator', version: 1, type, payload
 | `preview-generated` | A shingle preview rendered |
 | `proposal-created` / `pdf-generated` | A proposal was saved / its PDF link is ready |
 
+### Lead webhooks
+
+`postMessage` tells the partner's **page** what the homeowner is doing. Lead webhooks tell the partner's **server** what Scanifly recorded: `lead.created` when a measurement starts, then `lead.completed` (area, pitch, kW, panels, production) or `lead.failed`. They are signed, retried and de-duplicated, which makes them the reliable way into a CRM.
+
+Each page view here mints with its own `externalId` (`summit-…`, standing in for the partner's CRM id). Every lead the embed measures carries it, and it comes back as `lead.externalId` in that lead's webhooks, so the delivery can be matched to the visit. A measurement reused from one the company already has creates no lead and sends no webhook.
+
+To watch deliveries arrive in the panel:
+
+1. Expose this server, for example `ngrok http 4100`.
+2. On the test company, create a subscription (portal: **Account → Webhooks**, or the API) with `callbackUrl` `https://<your tunnel>/webhooks/scanifly`, events `lead.created`, `lead.completed`, `lead.failed`, and a `signingSecret` of 32+ characters.
+3. Put the same secret in `.env` as `SCANIFLY_WEBHOOK_SECRET` and restart.
+
+`/webhooks/scanifly` verifies `x-scanifly-signature` (HMAC-SHA256 of `"{t}.{raw body}"`, five-minute window), acknowledges retries of an event it has already taken, and shows each delivery in the panel's webhook lane.
+
 ## Open questions
 
 1. **Framing policy.** portal-beta sends no `X-Frame-Options` or `frame-ancestors`, so any site can frame it. Should portal-fe send `frame-ancestors` per partner? That needs each partner's allowed domains, and the same list would pin the `postMessage` target origin.

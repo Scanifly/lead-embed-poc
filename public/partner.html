@@ -17,6 +17,7 @@
       --lane-partner: #e07a2f;
       --lane-browser: #6cb6ff;
       --lane-scanifly: #57d39b;
+      --lane-webhook: #c792ea;
       --warn: #f2c94c;
     }
     * { box-sizing: border-box; }
@@ -73,6 +74,7 @@
     .ev.partner { border-color: var(--lane-partner); }
     .ev.browser { border-color: var(--lane-browser); }
     .ev.scanifly { border-color: var(--lane-scanifly); }
+    .ev.webhook { border-color: var(--lane-webhook); }
   </style>
 </head>
 <body>
@@ -135,6 +137,7 @@
       <li data-step="exchange"><span class="n">3</span><div>Code traded for a session, inside the iframe<small>POST /roof-estimator/embed/session — confirmed when the iframe posts <code>ready</code></small></div></li>
       <li data-step="estimate"><span class="n">4</span><div>Homeowner picks address &amp; colors<small>Measurement, previews (4 free → 6 bought → stop at 10 per home) — ticked on <code>preview-generated</code></small></div></li>
       <li data-step="lead"><span class="n">5</span><div>Proposal &amp; PDF handed to the partner page<small>postMessage <code>proposal-created</code> / <code>pdf-generated</code> → partner's CRM</small></div></li>
+      <li data-step="webhook"><span class="n">6</span><div>Lead webhooks reach the partner server<small>Signed <code>lead.created</code> / <code>lead.completed</code>, carrying the visit's <code>externalId</code></small></div></li>
     </ol>
     <div class="controls">
       <button id="btn-reload" title="A real page view: the partner server mints a new link">New page view</button>
@@ -146,6 +149,7 @@
       <span><i style="background:var(--lane-partner)"></i>Partner server</span>
       <span><i style="background:var(--lane-scanifly)"></i>Scanifly (portal-beta)</span>
       <span><i style="background:var(--lane-browser)"></i>Browser / iframe</span>
+      <span><i style="background:var(--lane-webhook)"></i>Webhook → partner server</span>
     </div>
     <div class="log" id="log"></div>
   </aside>
@@ -204,7 +208,8 @@
     el.className = `ev ${event.lane}`;
     el.innerHTML = `<div class="meta"><span></span><span></span></div><div class="title"></div>`;
     const [lane, time] = el.querySelectorAll('.meta span');
-    lane.textContent = event.lane === 'scanifly' ? 'scanifly · portal-beta' : event.lane;
+    lane.textContent =
+      { scanifly: 'scanifly · portal-beta', webhook: 'webhook · server to server' }[event.lane] ?? event.lane;
     time.textContent = new Date(event.at).toLocaleTimeString();
     el.querySelector('.title').textContent = event.title;
     if (event.detail) {
@@ -215,6 +220,7 @@
     logEl.appendChild(el);
     logEl.scrollTop = logEl.scrollHeight;
     if (event.lane === 'scanifly' && event.title.includes('link issued')) markStep('mint');
+    if (event.lane === 'webhook' && event.title.includes('lead.completed')) markStep('webhook');
   }
 
   /**
