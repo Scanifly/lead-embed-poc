@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Summit Roofing Co.</title>
+  <style>
+    :root {
+      --brand: #1f3d2b;
+      --brand-accent: #e07a2f;
+      --ink: #1b1f1d;
+      --muted: #5d6661;
+      --paper: #f6f3ee;
+      --panel: #0f1419;
+      --panel-ink: #d6dde4;
+      --panel-muted: #7d8894;
+      --lane-partner: #e07a2f;
+      --lane-browser: #6cb6ff;
+      --lane-scanifly: #57d39b;
+      --warn: #f2c94c;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--paper); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; min-height: 100vh; }
+    @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .panel { position: static !important; height: auto !important; } }
+
+    /* ---- The partner's own website ---- */
+    header.site { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; background: var(--brand); color: #fff; }
+    .logo { font-weight: 800; letter-spacing: .02em; font-size: 20px; }
+    .logo span { color: var(--brand-accent); }
+    nav a { color: #cfe0d5; text-decoration: none; margin-left: 22px; font-size: 14px; }
+    .hero { padding: 40px 32px 16px; max-width: 1100px; }
+    .hero h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; color: var(--brand); }
+    .hero p { color: var(--muted); max-width: 620px; margin: 0; }
+    .embed-wrap { margin: 20px 32px 40px; max-width: 1100px; }
+    .lead-form { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 32px 0; max-width: 1100px; }
+    .lead-form input { flex: 1 1 320px; padding: 11px 14px; border: 1px solid #cfc8bd; border-radius: 8px; font: inherit; }
+    .lead-form select { padding: 11px 10px; border: 1px solid #cfc8bd; border-radius: 8px; font: inherit; background: #fff; }
+    .lead-form button { padding: 11px 18px; border: 0; border-radius: 8px; background: var(--brand-accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    .lead-form-reset { align-self: center; color: var(--muted); font-size: 14px; }
+    .embed-label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .embed-label code { background: #e9e4dc; padding: 1px 6px; border-radius: 4px; text-transform: none; letter-spacing: 0; }
+    iframe#estimator { display: block; width: 100%; height: 860px; border: 0; border-radius: 14px; background: #fff; box-shadow: 0 10px 30px rgba(31, 61, 43, .12); transition: height .2s ease; }
+    .error { padding: 20px; border-radius: 14px; background: #fff4e5; border: 1px solid #f0c48a; color: #6b3d00; }
+    .error code { background: #fde6c4; padding: 1px 5px; border-radius: 4px; }
+    .trust { display: flex; gap: 28px; flex-wrap: wrap; padding: 0 32px 48px; color: var(--muted); font-size: 14px; }
+
+    /* ---- The demo's "behind the scenes" panel (not part of a real partner site) ---- */
+    .panel { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; background: var(--panel); color: var(--panel-ink); font-size: 13px; }
+    .panel-head { padding: 18px 20px 10px; border-bottom: 1px solid #222b33; }
+    .panel-head h2 { margin: 0 0 2px; font-size: 15px; color: #fff; }
+    .panel-head .mode { color: var(--panel-muted); font-size: 12px; word-break: break-all; }
+    .steps { list-style: none; margin: 0; padding: 12px 20px; display: grid; gap: 6px; border-bottom: 1px solid #222b33; }
+    .steps li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; color: var(--panel-muted); }
+    .steps li .n { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #3a4652; display: grid; place-items: center; font-size: 11px; }
+    .steps li.done { color: var(--panel-ink); }
+    .steps li.done .n { background: var(--lane-scanifly); border-color: var(--lane-scanifly); color: #0f1419; font-weight: 700; }
+    .steps li.failed .n { background: #e5534b; border-color: #e5534b; color: #fff; }
+    .steps li small { display: block; color: var(--panel-muted); }
+    .steps li small.todo { color: var(--warn); }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 20px; border-bottom: 1px solid #222b33; }
+    .controls button { background: #1c252e; color: var(--panel-ink); border: 1px solid #2d3944; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+    .controls button:hover { border-color: var(--lane-browser); }
+    .controls button:disabled { opacity: .4; cursor: default; }
+    .legend { display: flex; gap: 12px; padding: 8px 20px; color: var(--panel-muted); font-size: 11px; border-bottom: 1px solid #222b33; flex-wrap: wrap; }
+    .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
+    .log { flex: 1; overflow-y: auto; padding: 8px 12px 24px; }
+    .ev { border-left: 3px solid; padding: 6px 10px; margin: 6px 0; background: #151c23; border-radius: 0 6px 6px 0; animation: in .25s ease; }
+    @keyframes in { from { opacity: 0; transform: translateX(8px); } }
+    .ev .meta { display: flex; justify-content: space-between; color: var(--panel-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    .ev .title { color: #fff; margin-top: 2px; }
+    .ev pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-all; color: #a9b4bf; font-size: 11px; }
+    .ev.partner { border-color: var(--lane-partner); }
+    .ev.browser { border-color: var(--lane-browser); }
+    .ev.scanifly { border-color: var(--lane-scanifly); }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <main>
+    <header class="site">
+      <div class="logo">SUMMIT <span>ROOFING</span> CO.</div>
+      <nav><a href="#">Services</a><a href="#">Financing</a><a href="#">Reviews</a><a href="#">Contact</a></nav>
+    </header>
+
+    <section class="hero">
+      <h1>See your new roof before we lay a single shingle.</h1>
+      <p>Enter your address, pick a color, and get an instant estimate built from aerial measurements of your actual roof. No appointment needed.</p>
+    </section>
+
+    <!--
+      The partner's own form: gather the address (and a colour) on their site, then show only the
+      finished result in the embed. Submitting reloads the page, whose server mints a prefilled link.
+    -->
+    <form class="lead-form" method="get" action="/">
+      <input name="address" placeholder="Your address, e.g. 1600 Wynkoop St, Denver, CO" required />
+      <select name="products" id="products-select" aria-label="What to estimate">
+        <option value="roof">New roof</option>
+        <option value="solar">Solar</option>
+        <option value="roof,solar">Roof + solar</option>
+      </select>
+      <select name="mode" id="mode-select" aria-label="How the estimator opens">
+        <option value="result">Result only</option>
+        <option value="full">All steps</option>
+      </select>
+      <select name="shingleId" id="shingle-select"><option value="">Any colour</option></select>
+      <button type="submit">See my estimate</button>
+      <a href="/" class="lead-form-reset">Start over</a>
+    </form>
+
+    <section class="embed-wrap" id="embed-wrap">
+      <div class="embed-label">
+        Embedded Scanifly estimator · cross-origin iframe · <code>{{EMBED_ORIGIN}}</code>
+      </div>
+      <!--
+        Everything a partner adds to their page. The src was minted by the partner's server for this
+        page view; the API key that minted it never left that server.
+      -->
+      <iframe id="estimator" src="{{EMBED_URL}}" title="Roof estimator" allow="camera" referrerpolicy="no-referrer"></iframe>
+    </section>
+
+    <div class="trust">
+      <span>★★★★★ 4.9 from 1,200+ homeowners</span><span>Licensed &amp; insured</span><span>Lifetime workmanship warranty</span>
+    </div>
+  </main>
+
+  <aside class="panel" aria-label="Behind the scenes">
+    <div class="panel-head">
+      <h2>Behind the scenes</h2>
+      <div class="mode">POC panel, not part of the partner's site · minting from {{API_URL}} · link expires <span id="expires">—</span></div>
+    </div>
+    <ol class="steps">
+      <li data-step="mint"><span class="n">1</span><div>Partner server mints a link<small>POST /api/v1/roof-estimator/embed-sessions (API key, server-to-server)</small></div></li>
+      <li data-step="load"><span class="n">2</span><div>iframe loads portal-beta with a single-use code<small>/embed/roof-estimator?code=… (valid 5 min, once)</small></div></li>
+      <li data-step="exchange"><span class="n">3</span><div>Code traded for a session, inside the iframe<small>POST /roof-estimator/embed/session — confirmed when the iframe posts <code>ready</code></small></div></li>
+      <li data-step="estimate"><span class="n">4</span><div>Homeowner picks address &amp; colors<small>Measurement, previews (4 free → 6 bought → stop at 10 per home) — ticked on <code>preview-generated</code></small></div></li>
+      <li data-step="lead"><span class="n">5</span><div>Proposal &amp; PDF handed to the partner page<small>postMessage <code>proposal-created</code> / <code>pdf-generated</code> → partner's CRM</small></div></li>
+    </ol>
+    <div class="controls">
+      <button id="btn-reload" title="A real page view: the partner server mints a new link">New page view</button>
+      <button id="btn-replay" title="What a cached page or a leaked URL gets">Replay the spent link</button>
+      <button id="btn-open" title="Open the iframe page on its own, to inspect it in DevTools">Open embed in new tab</button>
+      <button id="btn-clear">Clear log</button>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--lane-partner)"></i>Partner server</span>
+      <span><i style="background:var(--lane-scanifly)"></i>Scanifly (portal-beta)</span>
+      <span><i style="background:var(--lane-browser)"></i>Browser / iframe</span>
+    </div>
+    <div class="log" id="log"></div>
+  </aside>
+</div>
+
+<script>
+  const EMBED_URL = '{{EMBED_URL}}'.replaceAll('&amp;', '&');
+  const EMBED_ORIGIN = '{{EMBED_ORIGIN}}';
+  const EXPIRES_AT = '{{EXPIRES_AT}}';
+  const ERROR = '{{ERROR}}';
+  const iframe = document.getElementById('estimator');
+  const logEl = document.getElementById('log');
+  let lastEventId = 0;
+
+  if (EXPIRES_AT) document.getElementById('expires').textContent = new Date(EXPIRES_AT).toLocaleTimeString();
+
+  /* Keeps what was submitted in the form, and fills the colour picker from the catalogue API. */
+  (async () => {
+    const params = new URLSearchParams(location.search);
+    const form = document.querySelector('.lead-form');
+    form.address.value = params.get('address') ?? '';
+    form.products.value = params.get('products') ?? 'roof';
+    form.mode.value = params.get('mode') ?? 'result';
+    /* A colour only applies to a roof estimate. */
+    const syncShingle = () => (form.shingleId.disabled = !form.products.value.includes('roof'));
+    form.products.addEventListener('change', syncShingle);
+    syncShingle();
+    try {
+      const res = await fetch('/__poc/shingles');
+      if (!res.ok) return;
+      const { shingles = [] } = await res.json();
+      const select = document.getElementById('shingle-select');
+      shingles.forEach(({ id, name, line }) => select.add(new Option(`${name}${line ? ` · ${line}` : ''}`, id)));
+      select.value = params.get('shingleId') ?? '';
+    } catch { /* the catalogue route is not deployed yet; "Any colour" still works */ }
+  })();
+
+  if (ERROR) {
+    document.getElementById('embed-wrap').innerHTML = `<div class="error"><b>No embed link for this page view.</b><br>${ERROR}<br><br>Run with <code>SCANIFLY_API_KEY=… node server.mjs</code> or set it in <code>.env</code>, then reload.</div>`;
+    markStep('mint', 'failed');
+    ['btn-replay', 'btn-open'].forEach((id) => (document.getElementById(id).disabled = true));
+  }
+
+  /**
+   * Marks a step in the process list as done (or failed) once something proves it.
+   */
+  function markStep(step, status = 'done') {
+    document.querySelector(`[data-step="${step}"]`)?.classList.add(status);
+  }
+
+  /**
+   * Appends one log line to the panel and keeps it scrolled to the newest.
+   */
+  function renderEvent(event) {
+    const el = document.createElement('div');
+    el.className = `ev ${event.lane}`;
+    el.innerHTML = `<div class="meta"><span></span><span></span></div><div class="title"></div>`;
+    const [lane, time] = el.querySelectorAll('.meta span');
+    lane.textContent = event.lane === 'scanifly' ? 'scanifly · portal-beta' : event.lane;
+    time.textContent = new Date(event.at).toLocaleTimeString();
+    el.querySelector('.title').textContent = event.title;
+    if (event.detail) {
+      const pre = document.createElement('pre');
+      pre.textContent = JSON.stringify(event.detail, null, 2);
+      el.appendChild(pre);
+    }
+    logEl.appendChild(el);
+    logEl.scrollTop = logEl.scrollHeight;
+    if (event.lane === 'scanifly' && event.title.includes('link issued')) markStep('mint');
+  }
+
+  /**
+   * Pulls new lines from the server's log. Polling keeps the POC dependency-free.
+   */
+  async function pollEvents() {
+    try {
+      const res = await fetch(`/__poc/events?since=${lastEventId}`);
+      for (const event of await res.json()) {
+        lastEventId = event.id;
+        renderEvent(event);
+      }
+    } catch { /* server restarting; try again next tick */ }
+  }
+  setInterval(pollEvents, 600);
+  pollEvents();
+
+  /**
+   * Adds a browser-side line to the shared log, so it interleaves with the server's lines.
+   */
+  function logBrowser(title, detail) {
+    fetch('/__poc/browser-event', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ title, detail }),
+    });
+  }
+
+  /*
+    `load` is all a host page can observe of a cross-origin iframe: it fires once the document has
+    loaded, but says nothing about whether the code inside was redeemed.
+  */
+  iframe.addEventListener('load', () => {
+    if (!EMBED_URL) return;
+    markStep('load');
+    logBrowser(`iframe loaded ${EMBED_ORIGIN}/embed/roof-estimator`, {
+      note: 'The code exchange happens next, inside the iframe, out of the host page’s sight.',
+    });
+  });
+
+  /*
+    The partner-facing contract, once portal-fe emits one. Only messages from the embed's own
+    origin are trusted; the origin check is the part a partner must never skip.
+  */
+  /*
+    The partner-facing contract: { source: 'scanifly-roof-estimator', version, type, payload }.
+    Checking event.origin is the part a partner must never skip.
+  */
+  window.addEventListener('message', (event) => {
+    if (event.origin !== EMBED_ORIGIN) return;
+    const { source, type, payload } = event.data ?? {};
+    if (source !== 'scanifly-roof-estimator') return;
+
+    /* Sized to the content, so the homeowner never scrolls inside the frame. Not logged: it is chatty. */
+    if (type === 'resize' && payload?.height) {
+      iframe.style.height = `${Math.max(480, payload.height + 24)}px`;
+      return;
+    }
+
+    logBrowser(`postMessage ← iframe: ${type}`, payload);
+
+    if (type === 'ready') markStep('exchange');
+    if (type === 'preview-generated') markStep('estimate');
+    if (type === 'proposal-created' || type === 'pdf-generated') markStep('lead');
+    if (type === 'pdf-generated') toast(`<b>Proposal PDF ready</b><br><a href="${payload.url}" target="_blank" rel="noopener" style="color:#fff">Open the PDF</a><br><small>The partner would attach this in their CRM email.</small>`);
+    if (type === 'error') markStep('exchange', 'failed');
+  });
+
+  /**
+   * Shows a short notice in the corner of the partner's page.
+   */
+  function toast(html) {
+    let el = document.getElementById('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.style.cssText = 'position:fixed;left:24px;bottom:24px;max-width:360px;background:#1f3d2b;color:#fff;padding:14px 16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:14px;z-index:10';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = html;
+    el.style.display = 'block';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => (el.style.display = 'none'), 10000);
+  }
+
+  document.getElementById('btn-reload').addEventListener('click', () => location.reload());
+
+  /* Points the iframe back at the URL this page was rendered with, whose code is already spent. */
+  document.getElementById('btn-replay').addEventListener('click', () => {
+    logBrowser('Re-loading the iframe with the already-redeemed URL', {
+      expect: 'portal-beta answers 401 and the embed shows “This estimator link is no longer valid.”',
+    });
+    iframe.src = EMBED_URL;
+  });
+
+  /*
+    Mints a fresh link by rendering a new page view in a new tab, rather than reusing this page's
+    link, which the iframe has already spent.
+  */
+  document.getElementById('btn-open').addEventListener('click', async () => {
+    const tab = window.open('about:blank');
+    const res = await fetch('/', { cache: 'no-store' });
+    const html = await res.text();
+    const fresh = html.match(/<iframe id="estimator" src="([^"]+)"/)?.[1]?.replaceAll('&amp;', '&');
+    if (fresh) tab.location = fresh;
+    else tab.close();
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', async () => {
+    await fetch('/__poc/reset', { method: 'POST' });
+    logEl.innerHTML = '';
+    lastEventId = 0;
+  });
+</script>
+</body>
+</html>
